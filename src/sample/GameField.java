@@ -32,21 +32,15 @@ public class GameField {
         }
     }
 
-    private void write(int[][] field) {
-        for (int i = 0; i < 4; i++) {
-            for (int j = 0; j < 4; j++) {
-                System.out.print(field[i][j] + "   ");
-            }
-            System.out.println("");
-        }
-    }
-
     void addRandom() {
         while (true) {
             int x = (int) (Math.random() * 4);
             int y = (int) (Math.random() * 4);
             if (gameField[x][y] == 0) {
-                gameField[x][y] = 2;
+                double chance = Math.random();
+                if (chance < 0.9) {
+                    gameField[x][y] = 2;
+                } else gameField[x][y] = 4;
                 break;
             }
         }
@@ -56,60 +50,102 @@ public class GameField {
         return ((x != 0) && ((x & (~x + 1)) == x));
     }
 
-    private int checkNotNullRow(int row) {
-        int notNull = 0;
-        for (int j = 0; j < 4; j++) {
-            if (gameField[row][j] != 0) notNull++;
+
+    private void moveLeft(int row) {
+        for (int y = 1; y < 4; y++) {
+            int a = y;
+            if (gameField[row][a] != 0) {
+                while (a != 0) {
+                    if (gameField[row][a - 1] == 0) {
+                        gameField[row][a - 1] = gameField[row][a];
+                        gameField[row][a] = 0;
+                    }
+                    a--;
+                }
+            }
         }
-        return notNull;
     }
-
-    private int checkNotNullColumn(int column) {
-        int notNull = 0;
-        for (int i = 0; i < 4; i++) {
-            if (gameField[i][column] != 0) notNull++;
+    private void sumLeft(int row) {
+        for (int y = 0; y < 3; y++) {
+            if (gameField[row][y] != 0 && isPowerOfTwo(gameField[row][y + 1] + gameField[row][y])) {
+                increaseScore(gameField[row][y + 1], gameField[row][y]);
+                gameField[row][y] += gameField[row][y + 1];
+                gameField[row][y + 1] = 0;
+            }
         }
-        return notNull;
     }
 
-    private void moveColumnUp(int column) {
-            for (int i = 1; i < 4; i++) {
-                if (gameField[i][column] != 0 && isPowerOfTwo(gameField[i - 1][column] + gameField[i][column])) {
-                    increaseScore(gameField[i - 1][column], gameField[i][column]);
-                    gameField[i - 1][column] += gameField[i][column];
-                    gameField[i][column] = 0;
+    private void moveRight(int row) {
+        for (int y = 2; y > -1; y--) {
+            int a = y;
+            if (gameField[row][a] != 0) {
+                while (a != 3) {
+                    if (gameField[row][a + 1] == 0) {
+                        gameField[row][a + 1] = gameField[row][a];
+                        gameField[row][a] = 0;
+                    }
+                    a++;
                 }
             }
+        }
+    }
+    private void sumRight(int row) {
+        for (int y = 3; y > 0; y--) {
+            if (gameField[row][y] != 0 && isPowerOfTwo(gameField[row][y - 1] + gameField[row][y])) {
+                increaseScore(gameField[row][y - 1], gameField[row][y]);
+                gameField[row][y] += gameField[row][y - 1];
+                gameField[row][y - 1] = 0;
+            }
+        }
     }
 
-    private void moveColumnDown(int column) {
-            for (int i = 2; i > -1; i--) {
-                if (gameField[i][column] != 0 && isPowerOfTwo(gameField[i + 1][column] + gameField[i][column])) {
-                    increaseScore(gameField[i + 1][column], gameField[i][column]);
-                    gameField[i + 1][column] += gameField[i][column];
-                    gameField[i][column] = 0;
+    private void moveUp(int column) {
+        for (int x = 1; x < 4; x++) {
+            int a = x;
+            if (gameField[a][column] != 0) {
+                while (a != 0) {
+                    if (gameField[a - 1][column] == 0) {
+                        gameField[a - 1][column] = gameField[a][column];
+                        gameField[a][column] = 0;
+                    }
+                    a--;
                 }
             }
+        }
+    }
+    private void sumUp(int column) {
+        for (int x = 0; x < 3; x++) {
+            if (gameField[x][column] != 0 && isPowerOfTwo(gameField[x + 1][column] + gameField[x][column])) {
+                increaseScore(gameField[x + 1][column], gameField[x][column]);
+                gameField[x][column] += gameField[x + 1][column];
+                gameField[x + 1][column] = 0;
+            }
+        }
     }
 
-    private void moveRowLeft(int row) {
-            for (int j = 1; j < 4; j++) {
-                if (gameField[row][j] != 0 && isPowerOfTwo(gameField[row][j - 1] + gameField[row][j])) {
-                    increaseScore(gameField[row][j - 1], gameField[row][j]);
-                    gameField[row][j - 1] += gameField[row][j];
-                    gameField[row][j] = 0;
-                }
+    private void moveDown(int column) {
+        for (int x = 3; x > 0; x--) {
+            if (gameField[x][column] != 0 && isPowerOfTwo(gameField[x - 1][column] + gameField[x][column])) {
+                increaseScore(gameField[x - 1][column], gameField[x][column]);
+                gameField[x][column] += gameField[x - 1][column];
+                gameField[x - 1][column] = 0;
             }
+        }
     }
 
-    private void moveRowRight(int row) {
-            for (int j = 2; j > -1; j--) {
-                if (gameField[row][j] != 0 && isPowerOfTwo(gameField[row][j + 1] + gameField[row][j])) {
-                    increaseScore(gameField[row][j + 1], gameField[row][j]);
-                    gameField[row][j + 1] += gameField[row][j];
-                    gameField[row][j] = 0;
+    private void sumDown(int column) {
+        for (int x = 2; x > -1; x--) {
+            int a = x;
+            if (gameField[a][column] != 0) {
+                while (a != 3) {
+                    if (gameField[a + 1][column] == 0) {
+                        gameField[a + 1][column] = gameField[a][column];
+                        gameField[a][column] = 0;
+                    }
+                    a++;
                 }
             }
+        }
     }
 
     private int[][] setPreviousField(int[][] original) {
@@ -125,41 +161,33 @@ public class GameField {
         switch (direction) {
             case "UP": {
                 for (int i = 0; i < 4; i++) {
-                    for (int a = 0; a < 4; a++) {
-                        int notNull = checkNotNullColumn(i);
-                        moveColumnUp(i);
-                        if (notNull != checkNotNullColumn(i)) break;
-                    }
+                    moveUp(i);
+                    sumUp(i);
+                    moveUp(i);
                 }
             }
             break;
             case "DOWN": {
                 for (int i = 0; i < 4; i++) {
-                    for (int a = 0; a < 4; a++) {
-                        int notNull = checkNotNullColumn(i);
-                        moveColumnDown(i);
-                        if (notNull != checkNotNullColumn(i)) break;
-                    }
+                    sumDown(i);
+                    moveDown(i);
+                    sumDown(i);
                 }
             }
             break;
             case "LEFT": {
                 for (int i = 0; i < 4; i++) {
-                    for (int a = 0; a < 4; a++) {
-                        int notNull = checkNotNullRow(i);
-                        moveRowLeft(i);
-                        if (notNull != checkNotNullRow(i)) break;
-                    }
+                    moveLeft(i);
+                    sumLeft(i);
+                    moveLeft(i);
                 }
             }
             break;
             case "RIGHT": {
                 for (int i = 0; i < 4; i++) {
-                    for (int a = 0; a < 4; a++) {
-                        int notNull = checkNotNullRow(i);
-                        moveRowRight(i);
-                        if (notNull != checkNotNullRow(i)) break;
-                    }
+                    moveRight(i);
+                    sumRight(i);
+                    moveRight(i);
                 }
             }
             break;
